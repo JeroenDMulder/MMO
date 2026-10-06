@@ -1,0 +1,36 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "MMO (Biostatistics) | Labs"
+  reader-mode: true
+  sidebar:
+    style: "floating"
+    search: true
+    contents:
+      - text: Home
+        href: index.qmd
+      - text: "Day 1: Linear Regression"
+        href: Biostatsweek_Lab1_ans.qmd
+      - text: "Day 2: Logistic Regression"
+        href: Biostatsweek_Lab2_ans.qmd
+      - text: "Day 3: Multiple Regression"
+        href: Biostatsweek_Lab3_ans.qmd
+      - text: "Day 4: Survival Analysis"
+        href: Biostatsweek_Lab5_ans.qmd
+
+format:
+  html:
+    theme: [default, theme.scss]
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    highlight-style: github
+    css: styles.css
+    callout-appearance: default
+    callout-icon: true
+
+execute:
+  freeze: auto

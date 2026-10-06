@@ -1,0 +1,180 @@
+---
+title: "Lab 5 — Answer Key"
+author: "Karl Oskar Ekvall"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-copy: true
+    code-overflow: wrap
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+Click a question box to reveal the answer and R code.
+
+## Assignment description
+
+*n* = 400 rats participate in an experiment, in which they have to find cheese in a labyrinth. The rats are randomly assigned to a variety of conditions:
+
+- time_from_last_meal: hours since the last meal (0-24)
+- previous training: how many times the rat did the same exercise in the past
+- cheese: the type of cheese (parmesan, gorgonzola, emmental, and feta)
+
+Outcomes: avg_speed, find_cheese (0/1), time_to_find (censored if not found within 1 minute).
+
+Note: the time *T* of interest is the time it takes to find the cheese, so when we speak of "survival until time *t*", we mean the event *T* > *t*.
+
+```{r setup}
+lab5_dat <- readRDS("data5.Rds")
+str(lab5_dat) # Should show data.frame with 400 obs of 6 variables
+
+library(survival)
+```
+
+### Question 1
+
+Use the code below and look at the table presented. Explain what the survival column means, and do the calculations necessary to get the same numbers.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+Time 2: 4/5 survives, 4 persons thereafter  
+Time 4: one person is censored. He leaves the dataset. Survival still 4/5. 3 persons thereafter.  
+Time 5: person dies, new prob: 2/3 × 4/5 = 8/15 = 0.5333  
+Time 6: person disappears, prob remains 0.53333. One person is left.  
+Time 8: Last person dies. We observed no one who survived longer than 8, so we estimate the probability of surviving longer to be 0.
+
+```{r}
+t <- c(2, 4, 5, 6, 8)
+s <- c(1, 0, 1, 0, 1)
+surv_fit <- survfit(Surv(t, s) ~ 1)
+summary(surv_fit)
+```
+:::
+
+### Question 2
+
+Fit a simple logistic regression model investigating whether mice are more likely to find gorgonzola cheese than the other cheese types. Comment on the output.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The estimate indicates the probability of finding gorgonzola is higher than for the other cheese types. More precisely, the probability of finding gorgonzola is estimated to be $1 / (1 + \exp(-0.42 - 0.48))$ while the probability for the other cheese types is estimated to be $1 / (1 + \exp(-0.42))$. The p-value indicates the difference is significant on the 10% level but not on the 5% level.
+
+```{r}
+summary(glm(find_cheese ~ as.numeric(lab5_dat$cheese == "gorgonzola"), data = lab5_dat, family = binomial))
+
+1 / (1 + exp(-0.42 - 0.48)) # Probability for gorgonzola
+1 / (1 + exp(-0.42))         # Probability for other cheese types
+```
+:::
+
+### Question 3
+
+Define long_training and interpret the Kaplan-Meier plot by training group.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The figure indicates that survival probabilities, that is, the probability of not finding the cheese, are larger for mice with short training. Survival probabilities appear to be decreasing approximately linearly in time.
+
+```{r}
+lab5_dat$long_training <- lab5_dat$previous_training > median(lab5_dat$previous_training)
+```
+
+```{r}
+fit <- survfit(Surv(time_to_find, find_cheese) ~ long_training, data = lab5_dat)
+plot(fit, lty = 1:2)
+legend("bottomleft", legend = c("short training", "long training"), lty = 1:2)
+```
+:::
+
+### Question 4
+
+Plot the survival function of the time it took all the mice to find cheese. When is the hazard rate the highest and the lowest?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+It looks like the mice are finding cheese uniformly over the time period. The hazard rate is lowest at the beginning and highest at the end.
+
+```{r}
+fit <- survfit(Surv(time_to_find, find_cheese) ~ 1, data = lab5_dat)
+plot(fit, conf.int = F)
+
+reg_fit <- coxph(Surv(time_to_find, find_cheese) ~ 1, data = lab5_dat)
+baseline <- basehaz(reg_fit)
+
+plot(baseline$time, baseline$hazard, type = "l", main = "Hazard rates")
+```
+:::
+
+### Question 5
+
+Perform a log-rank test to see if mice with less than 5 hours of training have the same survival function as mice with 5 or more hours of training.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+We reject the null hypothesis of identical survival functions because of low p-value.
+
+```{r}
+survdiff(Surv(time_to_find, find_cheese) ~ previous_training < 5, data = lab5_dat)
+```
+:::
+
+### Question 6
+
+Plot the survival functions for each cheese type. What do you observe?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+Gorgonzola and emmental seem to be the easiest cheeses to find.
+
+```{r}
+km_plot <- survfit(Surv(time_to_find, find_cheese) ~ cheese, data = lab5_dat)
+plot(km_plot, col = 1:4, lty = 1:4, xlab = "Time", ylab = "Survival Probability")
+
+legend("topright", legend = levels(lab5_dat$cheese), col = 1:4, lty = 1:4, title = "Groups")
+```
+:::
+
+### Question 7
+
+Fit a Cox proportional hazards regression model with time_to_find as response and cheese as regressor. Do the results correspond with your answers in the previous question?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+Yes, the estimates of the hazards correspond to what we saw in the plot. Gorgonzola has the highest hazard rate followed by emmentaler, meaning that mice found those cheeses at a higher rate, meaning they are found sooner.
+
+```{r}
+coxph(Surv(time_to_find, find_cheese) ~ cheese, data = lab5_dat)
+```
+:::
+
+### Question 8
+
+Fit a proportional hazards regression model with time_to_find as response and time_from_last_meal, previous_training, and cheese as predictors. Interpret the output.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The estimates indicate time from last meal, previous training, gorgonzola, and parmesan all increase the probability of finding the cheese within a certain time; that is, they increase the hazard. For example, one unit extra of previous training on average leads to, all else equal, a hazard which is increased by a factor of $\exp(0.19) \approx 1.2$. The p-values indicate time from last meal, previous training, and cheese type (on the 10% level) are important predictors in this model.
+
+```{r}
+coxph(Surv(time_to_find, find_cheese) ~ time_from_last_meal + previous_training + cheese, data = lab5_dat)
+```
+:::
+
+### Question 9
+
+Does it seem like the proportional hazards assumption is fulfilled for the model in question 8?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The null hypothesis is that there is a proportional relationship between the hazards. We see that the p-value is 0.051 so on the 0.05 significance level we would not reject.
+
+```{r}
+cox.zph(coxph(Surv(time_to_find, find_cheese) ~ time_from_last_meal + previous_training + cheese, data = lab5_dat))
+
+cox.zph(coxph(Surv(time_to_find, find_cheese) ~ previous_training < 5, data = lab5_dat))
+```
+:::

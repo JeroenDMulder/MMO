@@ -1,0 +1,9 @@
+_site/
+**/*.knit.md
+**/*_files/
+/.quarto/
+
+**/*.quarto_ipynb
+
+# Data
+data/

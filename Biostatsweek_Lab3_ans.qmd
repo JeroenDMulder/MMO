@@ -1,0 +1,414 @@
+---
+title: "Day 3: Multiple Regression"
+subtitle: "Molecular Medicine - Oncology, Biostatistics"
+author: "Jeroen D. Mulder, Pär Villner, Karl Oskar Ekvall"
+date: now
+---
+
+In these lab exercises you will gain experience with multiple regression in `R`, and then use this method to study causal relationships. You will use two different datasets: One concerning elderly patients with leg fractures to practice with multiple regression, and another one concerning patients undergoing chemotherpy to treat a benign form of brain cancer. 
+
+# Multiple Regression 
+In 2013, $n = 1453$ elderly patients underwent surgery for leg fractures. We recorded baseline information, and contacted them one year later, asking them:
+
+- `y1`: To what degree they can move their broken leg (0-100).
+- `y2`: If they still have pain (0/1).
+
+In addition to these main outcomes of interest, we recorded: 
+
+- `hosp` = hospital in which they were treated
+- `severity` = severity of the fracture (1-10)
+- `sex` (m/f)
+- `edu` = education (low/medium/high)
+- `smoke` = smoking habits (0 = non smoker, 1 = smoker)
+- alcohol consumption (dl/day of alcoholic beverages)
+- `milk` = milk consumption (dl/day)
+- the existance of comorbidities (`ost` = osteoporosis; `cvd`; `cancer`; `diab` = diabetes) (0/1)
+- `partner` = whether they have a partner (0/1)
+- `city` = whether they live in a small/medium/big town
+
+Use the below code to load in the data: 
+
+```{r setup2}
+#| echo: true
+#| output: false
+# Read in the data
+lab4_dat <- readRDS("data4.Rds")
+str(lab4_dat) # Should show data.frame with 1453 obs of 17 variables
+```
+
+### Question 1
+Represent graphically the association between leg movability `y1` and each of the following predictors: `age`, `sex`, `bmi`, `city`, `partner`, `edu`, `smoke`, `alcohol`. Use `R`'s default `plot()` function. 
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+The relationships between various predictors can be visualized with repeated calls to `plot()`. Note that the type of plot is different depending on whether the variable to be plotted is continuous or categorical.
+```{r}
+#| echo: true
+#| output: false
+plot(lab4_dat$age, lab4_dat$y1)
+plot(lab4_dat$y1 ~ lab4_dat$sex)
+plot(lab4_dat$y1 ~ lab4_dat$bmi)
+plot(lab4_dat$y1 ~ lab4_dat$city)
+plot(lab4_dat$y1 ~ factor(lab4_dat$partner))
+plot(lab4_dat$y1 ~ lab4_dat$edu)
+plot(lab4_dat$y1 ~ factor(lab4_dat$smoke))
+plot(lab4_dat$y1 ~ lab4_dat$alcohol)
+```
+:::
+
+### Question 2
+
+Fit a linear regression model with `y1` as response and `smoke` as predictor. What is the estimated mean of `y1` among smokers and non-smokers? Is the difference statistically significant?
+
+::: {.callout-tip}
+## Tip
+Fitting a linear regression gives you parameter estimates. To understand how these parameters are related to the mean of different groups (in this case, nonsmokers versus smokers), it is useful to write down the regression equation and fill this equation in for both groups. 
+:::
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+A linear regression model can be fitted with the below code: 
+
+```{r}
+#| echo: true
+#| output: false
+# Fit a simple linear regression
+fit <- lm(y1 ~ smoke, lab4_dat)
+
+# Inspect the results
+summary(fit)
+```
+
+The data description above states that nonsmokers are indicated by `smoke = 0`. Hence, the mean `y1` for nonsmokers is $\hat{\beta}_0 + \hat{\beta}_1 \times smoke = 68.1286 -14.2874 \times smoke = 68.1286 -14.2874 \times 0 =  68.1286$. The mean `y1` for smokers is $\hat{\beta}_0 + \hat{\beta}_1 \times smoke = 68.1286 -14.2874 \times smoke = 68.1286 -14.2874 \times 1 = 53.8412$. In other words, $\beta_1$ represents the different between both groups. Looking at the $p$-value of this coefficient one can conclude that the difference between these two gropus is statistically significant.  
+:::
+
+### Question 3
+
+Use multiple linear regression to examine the effect of smoking on `y1` given `age`, `sex`, `bmi`, `city`, `partner`, `edu`, and `alcohol`. What do you find?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+A multiple linear regression can be fitted with the below code: 
+```{r}
+# Fit a multiple regression model
+fit <- lm(
+  formula = y1 ~ smoke + age + sex + bmi + city + partner + edu + alcohol,
+  data = lab4_dat
+)
+summary(fit)
+```
+Holding everything else fixed, the average `y1` for smokers is 1 lower than for non-smokers. Thus, a large part of the difference observed when not conditioning on other variables disappears when conditioning on the other variables. 
+:::
+
+### Question 4
+Suppose that, based on prior research and the scientific literature, we expect that relationship between BMI and movability of the leg is nonlinear; it it might be quadratic in fact. 
+
+Fit the same model as in Question 3 but now add a quadratic term for BMI using `I(bmi^2)`. Test whether its coefficient is equal to zero. What does `I(bmi^2)` tell us?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+A multiple regression with a quadratic term for BMI can be fitted with the below code: 
+
+```{r}
+#| echo: true
+#| output: false
+# Fit a multiple linear regression
+fit <- lm(
+  formula = y1 ~ smoke + age + sex + bmi + I(bmi^2) + city + partner + edu + alcohol,
+  data = lab4_dat
+)
+
+# Inspect output
+summary(fit)
+```
+
+
+BMI has a linear association of 3.7. But in addition, we now have a quadratic association `I(bmi^2)`, which modifies the linear association as a person gets higher BMI. As a person gets higher BMI, the positive effect of BMI on `y1` decreases, and eventually reverses. The $p$-value for both bmi terms is significant.
+
+This impact of the nonlinear term can best be understood by plotting predicted values of `y1` across a range of values for BMI: 
+
+```{r}
+#| echo: true
+#| output: false
+# Set the range of BMI's to predict `y1` for
+bmis <- 0:30
+
+# Predict y1
+y1hats <- 3.66015 * bmis - 0.13 * bmis^2
+
+# Visualize predicted outcome under quadratic model
+plot(bmis, y1hats)
+```
+:::
+
+### Question 5
+
+Interpret the intercept in the model in Question 4.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The intercept is the estimated average `y1` for a person who does not smoke, is female, is aged 0, has a BMI of 0, lives in a large city, and so on, so that all predictors are zero. Such a person does not exist, so even though we can technically say that is what the intercept is, it has no practical meaning in this setting.
+:::
+
+### Question 6
+
+Fit the same model as in Question 4 but also add a term `sex:partner`. Explain what the new term does and interpret it in context.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+In `R`, one can create an interaction between two variables either manually outside of the analysis, or within the fitting of the model with the `:` sign. A model including an interaction term can thus be fitted as: 
+
+```{r}
+#| echo: true
+#| output: false
+# Fit a linear regression with interaction term and quadratic term
+fit <- lm(
+  formula = y1 ~ smoke + age + sex + bmi + city + partner +  edu + alcohol + # Linear terms
+    I(bmi^2) + # Quadratic term
+    partner:sex, # Interaction term
+  data = lab4_dat
+)
+
+# Inspect output
+summary(fit)
+```
+
+The male with a partner on average leg mobility is $(2.83184 - 0.34361) = 2.48639$ units higher than for a female with a partner, holding everything else fixed.
+:::
+
+### Question 7
+We suspect that age might have a nonlinear relationship with moveability, and hence want to test if we can extend the model with further nonlinear terms. Fit models with higher-order terms for `age` included in the model, and use model selection criteria to determine, based on the data, what the best model is. 
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+First, fit a series of models with an increasing polynomial for the `age` variable: 
+```{r}
+#| echo: true
+#| output: false
+# Fit linear regression model
+fit_lin <- lm(
+  y1 ~ smoke + age + sex + bmi + city + partner + edu + alcohol,
+  lab4_dat
+)
+# Fit linear regression model with quadratic age term
+fit_qua <- lm(
+  y1 ~ smoke + age + sex + bmi + city + partner + edu + alcohol + I(age^2),
+  lab4_dat
+)
+# Fit linear regression model with cubic age term
+fit_cub <- lm(
+  y1 ~ smoke + age + sex + bmi + city + partner + edu + alcohol + I(age^2) + I(age^3),
+  lab4_dat
+)
+
+```
+
+We can use the information criteria AIC and BIC to compare these different models. In `R`, one can simply extract these from fitted models using the `AIC()` and `BIC()` functions:
+
+```{r}
+#| echo: true
+#| output: false
+# BIC
+BIC(fit_lin)
+BIC(fit_qua)
+BIC(fit_cub)
+
+# AIC
+AIC(fit_lin)
+AIC(fit_qua)
+AIC(fit_cub)
+```
+
+While the AIC shows little difference between the models in terms of the fit-complexity balance, the BIC shows a stronger preference for the simplest model with only age. 
+:::
+
+### Question 8
+
+Fit a logistic regression model for `y2` where the regressors are the same as in Question 3. Interpret the output.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The output indicates that smoking does not affect the probability of still having pain, but some of the other covariates do. For example, males are more likely to experience pain on average, holding everything else fixed, while having a partner decreases the probability of pain.
+
+```{r}
+#| echo: true
+#| output: false
+# Fit logitist regression model
+fit <- glm(
+  y2 ~ smoke + age + sex + bmi + city + partner + edu + alcohol,
+  data = lab4_dat,
+  family = binomial
+)
+
+# Inspect results
+summary(fit)
+```
+:::
+
+# Causal Inference
+Next, we use a dataset of $n = 759$ patients with a benign form of brain cancer who are treated with chemotherapy. Some of them receive a drug "A", while the others are assigned a new drug "B". Both drugs "A" and "B" block the protein xyz, which is the "food" of the cancer: The cancer dies by starvation. However, the drugs may not work: If the cancer is still alive after 2 months, it will be removed with surgery. We recorded the following covariates:
+
+- `size0` = initial size of the tumor, in millimeters
+- `age` and `sex` of the patient
+- `hospital` in which the patient was treated (a number between 1 and 23)
+- `golf` = 0/1 = does the patient play golf?
+- `rs123` (AA/AG/GG), a single nucleotide polymorphism that may be involved in the development of the cancer
+- `xyz` = the protein xyz (which is blocked by the drugs) measured one month after the therapy started
+
+We are interested in the following final outcomes:
+
+- `size1` = size of the tumor (millimeters) one month after the therapy was initiated
+- `surgery` = 0/1 = was surgery necessary to remove the cancer? (2 months after initiation of therapy)
+
+```{r setup}
+#| echo: true
+#| output: false
+# Read in the data
+lab3_dat <- readRDS("data3.Rds")
+str(lab3_dat) # Should show data.frame with 969 obs of 10 variables
+```
+
+### Question 1
+
+Create a variable called `size_d` which is the difference in tumor size one month after versus initial size. After creating `size_d`, add it to the dataset. Plot a histogram of `size_d`.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+`size_d` is a measure of how the tumor has changed in size since therapy was started.
+
+```{r}
+#| echo: true
+#| output: false
+# Create the difference in tumor size and add to data.frame
+lab3_dat$size_d <- lab3_dat$size1 - lab3_dat$size0
+
+# Plot the distribution of tumor size differences
+hist(lab3_dat$size_d)
+```
+:::
+
+### Question 2
+
+Suppose you are interested in estimating the effect of drug on `size_d`. Which variables in the dataset may have a causal effect on both `size_d` and `drug`? Does your answer depend on whether the drugs were randomly assigned or not?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+If the drug is randomly assigned, then there is no other variable which has affected the probability of getting drug A instead of drug B. If assignment was not random, then `size0` may have affected the drug variable (those with bigger initial size might have an increased probability of receiving a drug, and hence intial tumor size is a potential confounder), and it is obviously related to `size_d`.
+
+There are many other possibilities, and the purpose of this exercise is to have you think. Moreover, this is not a question mainly for statisticians, but for subject matter experts. We need to know what rs123 is, for instance, is and how it matters.
+:::
+
+### Question 3
+
+Use a simple logistic regression model to test whether one drug is associated with lower levels of that protein than the other drug. Comment on your findings and illustrate the result visually.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The error message indicates the fit is unreliable. In this case that is because there is almost perfect separation; that is, one can predict with near-certainty that someone with $xyz > 0.5$ received drug A. A plot shows this, for example.
+
+```{r}
+#| echo: true
+#| output: false
+# Fit a logistic regression model to see if there is an association between xyz and drug assignment
+fit <- glm(drug ~ xyz, data = lab3_dat, family = binomial)
+
+# Inspect output
+summary(fit)
+
+# Create plot between drug assignment and xyz enzym
+plot(as.numeric(lab3_dat$drug == "A"), lab3_dat$xyz)
+boxplot(xyz ~ drug, data = lab3_dat)
+
+min(lab3_dat$xyz[lab3_dat$drug == "A"])
+max(lab3_dat$xyz[lab3_dat$drug == "B"])
+```
+:::
+
+### Question 4
+
+Use a simple linear regression model to test whether one drug is associated with lower levels of the protein xyz. Comment on your findings. Can you draw conclusions about causality?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The estimates indicate drug B is associated with lower levels of xyz, and that difference is statistically significant on all conventional levels. Whether this is a sign of a causal relationship depends on if the drug was randomized or not. It could be that drug B was given to patients with particular xyz values, for instance.
+
+```{r}
+#| echo: true
+#| output: false
+summary(lm(xyz ~ drug, lab3_dat))
+```
+:::
+
+### Question 5
+
+Use a simple linear regression model to estimate the effect of `xyz` on `size_d`. Comment on your findings. Can you draw conclusions about causality? Do you worry about some confounder?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+`xyz` is associated with larger `size_d`; that is, the decrease in size between the two time-periods is negatively affected by the protein. This agrees with the data description, which says the protein is "food" for the cancer.
+
+It appeared like drug was strongly associated with the `xyz` value, and it is possible that drug is also associated with `size_d`. So clearly drug could be a confounder.
+
+```{r}
+#| echo: true
+#| output: false
+summary(lm(size_d ~ xyz, lab3_dat))
+```
+:::
+
+### Question 6
+
+Use a simple linear regression model to estimate the effect of `drug` on `size_d`. Explain what the intercept means and test if the intercept is -17.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The estimates indicate the average size decrease is greater with drug B, and the difference is statistically significant. This agrees with our earlier finding that drug B is associated with lower levels of the protein.
+
+The intercept gives us the mean change in tumor size for people who received drug A. I.e. we see a decrease in tumor size for drug A patients. A t value and (rough) 95% CI is given below. We see that the t-value is pretty low (certainly smaller than 1.96) and -17 is inside the confidence interval. So we cannot reject the null hypothesis.
+
+```{r}
+#| echo: true
+#| output: false
+size_mod <- lm(size_d ~ drug, lab3_dat)
+summary(size_mod)
+```
+
+```{r}
+#| echo: true
+#| output: false
+(-16.5025 + 17) / 0.4165
+
+confint(size_mod)
+```
+:::
+
+### Question 7
+
+Fit the same model as in Question 5 but separately for the two groups defined by drug. Compare the fits and comment on your findings.
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+The effect of xyz is not statistically significant for either subgroup on the 5% level, but the coefficient is larger and the p-value smaller for those receiving drug A. Together with our previous findings this may indicate, for example, that drug B blocks the protein so effectively that further decreasing the protein levels have little effect.
+
+Notice, this also indicates that our previous finding that xyz has a strong effect on size_d when not separating by drug, is almost fully explained by the different effects of the drugs on xyz.
+
+```{r}
+#| echo: true
+#| output: false
+fit_7_B <- lm(size_d[drug == "B"] ~ xyz[drug == "B"], lab3_dat)
+summary(fit_7_B)
+fit_7_A <- lm(size_d[drug == "A"] ~ xyz[drug == "A"], data = lab3_dat)
+summary(fit_7_A)
+```
+:::
+
+### Question 8
+
+Comment on the following output. Can you conclude that golfing causes lower levels of xyz, that higher levels of xyz cause people to dislike golfing, or both?
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+
+No, because the model says nothing about causality. It seems more likely there is some third variable affecting both xyz and golfing, inducing spurious correlation.
+
+```{r}
+#| echo: true
+#| output: false
+summary(lm(xyz ~ golf, data = lab3_dat))
+summary(glm(golf ~ xyz, data = lab3_dat, family = binomial))
+```
+:::

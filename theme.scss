@@ -1,0 +1,15 @@
+/*-- scss:defaults --*/
+$primary: #23373b;   // mDarkTeal (metropolis beamer theme)
+$link-color: $primary;
+
+/*-- scss:rules --*/
+// Navbar background/foreground
+.navbar {
+  background-color: $primary !important;
+}
+
+// Text selection highlight
+::selection {
+  background: $primary;
+  color: white;
+}

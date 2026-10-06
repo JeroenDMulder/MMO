@@ -1,0 +1,24 @@
+---
+title: "Lab Exercises"
+subtitle: "MMO (Biostatistics)"
+---
+
+Welcome to the lab sessions for Applied Biostatistics. Each lab day has its own page with an R session (code from the lectures) and exercises to work through. Use the navigation bar above to open a specific lab.
+
+## Overview
+
+The labs follow the lecture topics day by day. Each page starts with example R code, followed by assignment questions. Work through the R session first; the exercises are designed to be solvable with the commands shown there.
+
+| Lab | Topic | Main methods |
+|-----|-------|--------------|
+| [Lab 1](Biostatsweek_Lab1.Rmd) | Linear regression | `lm()`, diagnostics, confidence intervals |
+| [Lab 2](Biostatsweek_Lab2.Rmd) | Logistic regression | `glm(family = binomial)`, odds ratios |
+| [Lab 3](Biostatsweek_Lab3.Rmd) | Causal inference | Confounding, Simpson's paradox |
+| [Lab 4](Biostatsweek_Lab4.Rmd) | Multiple regression | Model building, interactions, LRT, AIC/BIC |
+| [Lab 5](Biostatsweek_Lab5.Rmd) | Survival analysis | Kaplan–Meier, Cox models (`survival` package) |
+
+## Before You Start
+
+- **Software:** [R](https://www.r-project.org/) and [RStudio](https://posit.co/download/rstudio-desktop/) (or Positron).
+- **Packages:** Lab 5 requires the `survival` package (`install.packages("survival")`). Other labs use base R.
+- **Data files:** Lab exercises read data from this folder (`Biostatsweek_data1.csv`, `data2.Rds`, `data4.Rds`, `data5.Rds`). Make sure these files are present before running the code chunks.
