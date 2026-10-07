@@ -6,9 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Karl Oskar Ekvall">
+<meta name="author" content="Jeroen D. Mulder, Pär Villner, Karl Oskar Ekvall">
+<meta name="dcterms.date" content="2026-10-07">
 
-<title>Lab 5 — Answer Key – MMO (Biostatistics) | Labs</title>
+<title>Day 4: Survival Analysis – MMO (Biostatistics) | Labs</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -78,7 +79,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-de63f62b328812d8e578a4d74e282472.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-76e18a06b801a7824f2ad39a85a11b2d.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-b6819cf686d0ea4d047cb8282094df92.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "sidebar",
   "copy-button": false,
@@ -183,12 +184,6 @@ window.Quarto = {
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Home</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="./Biostatsweek_Lab1_ans.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Day 1: Linear Regression</span></a>
   </div>
@@ -220,8 +215,20 @@ window.Quarto = {
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
+  <ul>
+  <li><a href="#data-description" id="toc-data-description" class="nav-link active" data-scroll-target="#data-description">Data Description</a></li>
+  <li><a href="#survival-analysis" id="toc-survival-analysis" class="nav-link" data-scroll-target="#survival-analysis">Survival Analysis</a>
   <ul class="collapse">
-  <li><a href="#assignment-description" id="toc-assignment-description" class="nav-link active" data-scroll-target="#assignment-description">Assignment description</a></li>
+  <li><a href="#question-1" id="toc-question-1" class="nav-link" data-scroll-target="#question-1">Question 1</a></li>
+  <li><a href="#question-2" id="toc-question-2" class="nav-link" data-scroll-target="#question-2">Question 2</a></li>
+  <li><a href="#question-3" id="toc-question-3" class="nav-link" data-scroll-target="#question-3">Question 3</a></li>
+  <li><a href="#question-4" id="toc-question-4" class="nav-link" data-scroll-target="#question-4">Question 4</a></li>
+  <li><a href="#question-5" id="toc-question-5" class="nav-link" data-scroll-target="#question-5">Question 5</a></li>
+  <li><a href="#question-6" id="toc-question-6" class="nav-link" data-scroll-target="#question-6">Question 6</a></li>
+  <li><a href="#question-7" id="toc-question-7" class="nav-link" data-scroll-target="#question-7">Question 7</a></li>
+  <li><a href="#question-8" id="toc-question-8" class="nav-link" data-scroll-target="#question-8">Question 8</a></li>
+  <li><a href="#question-9" id="toc-question-9" class="nav-link" data-scroll-target="#question-9">Question 9</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -230,7 +237,8 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Lab 5 — Answer Key</h1>
+<h1 class="title">Day 4: Survival Analysis</h1>
+<p class="subtitle lead">Molecular Medicine - Oncology, Biostatistics</p>
 </div>
 
 
@@ -240,10 +248,16 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Author</div>
     <div class="quarto-title-meta-contents">
-             <p>Karl Oskar Ekvall </p>
+             <p>Jeroen D. Mulder, Pär Villner, Karl Oskar Ekvall </p>
           </div>
   </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 7, 2026</p>
+    </div>
+  </div>
   
     
   </div>
@@ -253,38 +267,47 @@ window.Quarto = {
 </header>
 
 
-<p>Click a question box to reveal the answer and R code.</p>
-<section id="assignment-description" class="level2">
-<h2 class="anchored" data-anchor-id="assignment-description">Assignment description</h2>
-<p><em>n</em> = 400 rats participate in an experiment, in which they have to find cheese in a labyrinth. The rats are randomly assigned to a variety of conditions:</p>
+<p>In these lab exercises you will gain experience with survival analysis in <code>R</code>. For this, you will use data from an animal experiment involving <span class="math inline">\(n = 400\)</span> rats.</p>
+<section id="data-description" class="level1">
+<h1>Data Description</h1>
+<p>The <span class="math inline">\(n = 400\)</span> rats participated in an experiment, in which they had to find cheese in a labyrinth. The rats are randomly assigned to a variety of conditions:</p>
 <ul>
-<li>time_from_last_meal: hours since the last meal (0-24)</li>
-<li>previous training: how many times the rat did the same exercise in the past</li>
-<li>cheese: the type of cheese (parmesan, gorgonzola, emmental, and feta)</li>
+<li><code>time_from_last_meal</code>: hours since the last meal (0-24)</li>
+<li><code>previous training</code>: how many times the rat did the same exercise in the past</li>
+<li><code>cheese</code>: the type of cheese (parmesan, gorgonzola, emmental, and feta)</li>
 </ul>
-<p>Outcomes: avg_speed, find_cheese (0/1), time_to_find (censored if not found within 1 minute).</p>
-<p>Note: the time <em>T</em> of interest is the time it takes to find the cheese, so when we speak of “survival until time <em>t</em>”, we mean the event <em>T</em> &gt; <em>t</em>.</p>
+<p>The dataset includes various variables related to the outcome:</p>
+<ul>
+<li><code>avg_speed</code></li>
+<li><code>find_cheese</code> (0 = no, 1 = yes)</li>
+<li><code>time_to_find</code> (censored if not found within 1 minute).</li>
+</ul>
+<p>Note that time <em>T</em> of interest is the time it takes to find the cheese, so when we speak of “survival until time <em>t</em>”, we mean the event <em>T</em> &gt; <em>t</em>.</p>
+<p>Load the data into R using the <code>readRDS()</code> function:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>lab5_dat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data5.Rds"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>lab5_dat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"./data/data5.Rds"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(lab5_dat) <span class="co"># Should show data.frame with 400 obs of 6 variables</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>'data.frame':   400 obs. of  6 variables:
- $ time_from_last_meal: int  7 19 10 22 23 2 13 22 14 11 ...
- $ previous_training  : int  10 1 9 6 4 4 7 0 3 7 ...
- $ cheese             : Factor w/ 4 levels "emmental","feta",..: 3 3 4 4 3 2 3 3 1 1 ...
- $ avg_speed          : num  0.7 1.95 0.64 2.49 2.08 0.57 0.4 0.97 0.93 0.59 ...
- $ find_cheese        : int  1 1 1 1 1 0 1 0 1 1 ...
- $ time_to_find       : num  0.45 0.68 0.92 0.07 0.14 1 0.45 1 0.76 0.88 ...</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
+</section>
+<section id="survival-analysis" class="level1">
+<h1>Survival Analysis</h1>
+<p>To perform survival analysis in R, we make use of the <code>survival</code> package, which can be installed with <code>install.packages("survival")</code> and loaded with <code>library(survival)</code>.</p>
 <section id="question-1" class="level3">
 <h3 class="anchored" data-anchor-id="question-1">Question 1</h3>
 <p>Use the code below and look at the table presented. Explain what the survival column means, and do the calculations necessary to get the same numbers.</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">8</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(survival)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>surv_fit <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(t, s) <span class="sc">~</span> <span class="dv">1</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(surv_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -293,36 +316,31 @@ window.Quarto = {
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>Time 2: 4/5 survives, 4 persons thereafter<br>
-Time 4: one person is censored. He leaves the dataset. Survival still 4/5. 3 persons thereafter.<br>
-Time 5: person dies, new prob: 2/3 × 4/5 = 8/15 = 0.5333<br>
-Time 6: person disappears, prob remains 0.53333. One person is left.<br>
-Time 8: Last person dies. We observed no one who survived longer than 8, so we estimate the probability of surviving longer to be 0.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">8</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>surv_fit <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(t, s) <span class="sc">~</span> <span class="dv">1</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(surv_fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Call: survfit(formula = Surv(t, s) ~ 1)
-
- time n.risk n.event survival std.err lower 95% CI upper 95% CI
-    2      5       1    0.800   0.179        0.516            1
-    5      3       1    0.533   0.248        0.214            1
-    8      1       1    0.000     NaN           NA           NA</code></pre>
-</div>
-</div>
+<p>The first two lines create artifical surival data, where <code>t</code> represents the time at which an event happens, and <code>s</code> represents whether this event is censoring or the event of interest.</p>
+<p>The line <code>surv_fit &lt;- survfit(Surv(t, s) ~ 1)</code> does two things simultaneously. First, the function <code>Surv()</code> takes the data, and transforms it into an outcome variable that can be read by the <code>survfit()</code> function (which does the actual model fitting). Runnining <code>Surv(t, s)</code> shows that for the censored outcomes, a <code>+</code> sign is added to the survival time, indicating that the event is right censored.</p>
+<p>Using this data, we can compute the survival probabilities manually:</p>
+<ul>
+<li>Time 2: <span class="math inline">\(\frac{4}{5}\)</span> survive, 4 persons remain after this time;<br>
+</li>
+<li>Time 4: one person is censored. They leaves the dataset. Survival is still <span class="math inline">\(\frac{4}{5}\)</span>, but only 3 persons remain after this time.<br>
+</li>
+<li>Time 5: person dies, so the survival probability is updated to <span class="math inline">\(\frac{2}{3} \times \frac{4}{5} = \frac{8}{15} = 0.5333\)</span>.<br>
+</li>
+<li>Time 6: one person is censored. They leaves the dataset. Survival probability remains the same, but only one person is left.<br>
+</li>
+<li>Time 8: Last person dies. We observed no one who survived longer than 8, so we estimate the probability of surviving longer to be 0.</li>
+</ul>
 </div>
 </div>
 </div>
 </section>
 <section id="question-2" class="level3">
 <h3 class="anchored" data-anchor-id="question-2">Question 2</h3>
-<p>Fit a simple logistic regression model investigating whether mice are more likely to find gorgonzola cheese than the other cheese types. Comment on the output.</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<p>Fit a simple logistic regression model investigating whether mice are more likely to find gorgonzola cheese than the other cheese types. Comment on the results.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -331,9 +349,17 @@ Time 8: Last person dies. We observed no one who survived longer than 8, so we e
 </div>
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The estimate indicates the probability of finding gorgonzola is higher than for the other cheese types. More precisely, the probability of finding gorgonzola is estimated to be <span class="math inline">\(1 / (1 + \exp(-0.42 - 0.48))\)</span> while the probability for the other cheese types is estimated to be <span class="math inline">\(1 / (1 + \exp(-0.42))\)</span>. The p-value indicates the difference is significant on the 10% level but not on the 5% level.</p>
+<p>A logistic regression model can be fitted with the below code:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">glm</span>(find_cheese <span class="sc">~</span> <span class="fu">as.numeric</span>(lab5_dat<span class="sc">$</span>cheese <span class="sc">==</span> <span class="st">"gorgonzola"</span>), <span class="at">data =</span> lab5_dat, <span class="at">family =</span> binomial))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit logistic regression model</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fit_logistic <span class="ot">&lt;-</span> <span class="fu">glm</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> find_cheese <span class="sc">~</span> <span class="fu">as.numeric</span>(lab5_dat<span class="sc">$</span>cheese <span class="sc">==</span> <span class="st">"gorgonzola"</span>),</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> lab5_dat,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> binomial</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Inspect output</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_logistic)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
@@ -358,26 +384,34 @@ AIC: 527.41
 
 Number of Fisher Scoring iterations: 4</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fl">0.42</span> <span class="sc">-</span> <span class="fl">0.48</span>)) <span class="co"># Probability for gorgonzola</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_logistic)[<span class="dv">2</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>as.numeric(lab5_dat$cheese == "gorgonzola") 
+                                    1.60964 </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform to probabilities</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fl">0.42</span> <span class="sc">-</span> <span class="fl">0.48</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.7109495</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fl">0.42</span>))         <span class="co"># Probability for other cheese types</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fl">0.42</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.6034832</code></pre>
 </div>
 </div>
+<p>The result indicate that the odds ratio is <span class="math inline">\(e^{0.4760} = 1.60964\)</span>, indicating that the odds of finding gorgonzola cheese are higher than for finding other cheese types. This effect, however, is not significant at the 0.05 level, and hence I would not put too much weight on it.</p>
+<p>To transform these results on the probability scale, we can make use of the logistic function that was discussed in day 2. The probability of finding gorgonzola is estimated to be <span class="math inline">\(1 / (1 + \exp(-0.42 - 0.48)) =\)</span> while the probability for the other cheese types is estimated to be <span class="math inline">\(1 / (1 + \exp(-0.42))\)</span>.</p>
 </div>
 </div>
 </div>
 </section>
 <section id="question-3" class="level3">
 <h3 class="anchored" data-anchor-id="question-3">Question 3</h3>
-<p>Define long_training and interpret the Kaplan-Meier plot by training group.</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<p>Define a new variable called <code>long_training</code>. This variable divides the rats into those who have had more training than the median amount of experience with this exercise, and those who had less than the median. Interpret the Kaplan-Meier plot for both groups.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -386,14 +420,24 @@ Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The figure indicates that survival probabilities, that is, the probability of not finding the cheese, are larger for mice with short training. Survival probabilities appear to be decreasing approximately linearly in time.</p>
+<p>You can create the new variable with:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>lab5_dat<span class="sc">$</span>long_training <span class="ot">&lt;-</span> lab5_dat<span class="sc">$</span>previous_training <span class="sc">&gt;</span> <span class="fu">median</span>(lab5_dat<span class="sc">$</span>previous_training)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create the new `long_training` variable</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>lab5_dat<span class="sc">$</span>long_training <span class="ot">&lt;-</span> lab5_dat<span class="sc">$</span>previous_training <span class="sc">&gt;</span> <span class="fu">median</span>(lab5_dat<span class="sc">$</span>previous_training)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<p>To create the Kaplan-Meier survival curves for both groups, you can fit a survival model in which the survival time is predicted by group:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> long_training, <span class="at">data =</span> lab5_dat)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomleft"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"short training"</span>, <span class="st">"long training"</span>), <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a survival model predicting to finding by training experience</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">survfit</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> long_training,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> lab5_dat</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot Kaplan-Meier curves per group (indicated by different line types, lty)</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a legend to the plot</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"bottomleft"</span>, <span class="at">legend =</span> <span class="fu">c</span>(<span class="st">"short training"</span>, <span class="st">"long training"</span>), <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -402,6 +446,7 @@ Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 </div>
 </div>
+<p>The figure indicates that survival probabilities, that is, the probability of not finding the cheese, are larger for mice with short training. Survival probabilities appear to be decreasing approximately linearly in time.</p>
 </div>
 </div>
 </div>
@@ -409,10 +454,10 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <section id="question-4" class="level3">
 <h3 class="anchored" data-anchor-id="question-4">Question 4</h3>
 <p>Plot the survival function of the time it took all the mice to find cheese. When is the hazard rate the highest and the lowest?</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -421,10 +466,13 @@ Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>It looks like the mice are finding cheese uniformly over the time period. The hazard rate is lowest at the beginning and highest at the end.</p>
+<p>To plot a survival function for all mice, we can use the same function, <code>survfit()</code>, but simply without any predictors (groups):</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data =</span> lab5_dat)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">conf.int =</span> F)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate a survival curve across the entire sample</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data =</span> lab5_dat)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize estimated survival curve</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(fit, <span class="at">conf.int =</span> F)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -432,18 +480,29 @@ Number of Fisher Scoring iterations: 4</code></pre>
 </figure>
 </div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>reg_fit <span class="ot">&lt;-</span> <span class="fu">coxph</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> <span class="dv">1</span>, <span class="at">data =</span> lab5_dat)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>baseline <span class="ot">&lt;-</span> <span class="fu">basehaz</span>(reg_fit)</span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(baseline<span class="sc">$</span>time, baseline<span class="sc">$</span>hazard, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">main =</span> <span class="st">"Hazard rates"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>To estimate hazards, we need to run a Cox regression. Again, we do this without any predictors in the model such that the estimated hazard is representative for the entire sample:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a Cox proportional hazards model</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>reg_fit <span class="ot">&lt;-</span> <span class="fu">coxph</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> <span class="dv">1</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> lab5_dat</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Estimate the baseline hazard</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>baseline <span class="ot">&lt;-</span> <span class="fu">basehaz</span>(reg_fit)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize the estimated hazard rate (i.e., combining estimates of Cox proportional hazard model and baseline hazard)</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(baseline<span class="sc">$</span>time, baseline<span class="sc">$</span>hazard, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">main =</span> <span class="st">"Hazard rates"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Biostatsweek_Lab5_ans_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Biostatsweek_Lab5_ans_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>It looks like the mice are finding cheese uniformly over the time period. The hazard rate (i.e., the slope) is lowest (i.e., most horizontal) at the beginning and highest at the end.</p>
 </div>
 </div>
 </div>
@@ -451,10 +510,10 @@ Number of Fisher Scoring iterations: 4</code></pre>
 <section id="question-5" class="level3">
 <h3 class="anchored" data-anchor-id="question-5">Question 5</h3>
 <p>Perform a log-rank test to see if mice with less than 5 hours of training have the same survival function as mice with 5 or more hours of training.</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -463,32 +522,43 @@ Number of Fisher Scoring iterations: 4</code></pre>
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>We reject the null hypothesis of identical survival functions because of low p-value.</p>
+<p>First, create a new variable indicating whether mice had more or less than 5 hours of training:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">survdiff</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> previous_training <span class="sc">&lt;</span> <span class="dv">5</span>, <span class="at">data =</span> lab5_dat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create indicator for less than 5 hours of training</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>lab5_dat<span class="sc">$</span>less_than_5 <span class="ot">&lt;-</span> lab5_dat<span class="sc">$</span>previous_training <span class="sc">&lt;</span> <span class="dv">5</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Second, run a log-rank test comparing both groups on their mean survival time (i.e., time until finding the cheese):</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">survdiff</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> less_than_5,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> lab5_dat</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Call:
-survdiff(formula = Surv(time_to_find, find_cheese) ~ previous_training &lt; 
-    5, data = lab5_dat)
+survdiff(formula = Surv(time_to_find, find_cheese) ~ less_than_5, 
+    data = lab5_dat)
 
-                              N Observed Expected (O-E)^2/E (O-E)^2/V
-previous_training &lt; 5=FALSE 218      171      118      23.3      45.1
-previous_training &lt; 5=TRUE  182       81      134      20.7      45.1
+                    N Observed Expected (O-E)^2/E (O-E)^2/V
+less_than_5=FALSE 218      171      118      23.3      45.1
+less_than_5=TRUE  182       81      134      20.7      45.1
 
  Chisq= 45.1  on 1 degrees of freedom, p= 2e-11 </code></pre>
 </div>
 </div>
+<p>We reject the null hypothesis of identical survival functions because the p-value is below our (default) significance criterion of 0.05.</p>
 </div>
 </div>
 </div>
 </section>
 <section id="question-6" class="level3">
 <h3 class="anchored" data-anchor-id="question-6">Question 6</h3>
-<p>Plot the survival functions for each cheese type. What do you observe?</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<p>Plot the survival functions for each cheese type. Which cheeses to the mice find easiest to find?</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -497,31 +567,36 @@ previous_training &lt; 5=TRUE  182       81      134      20.7      45.1
 </div>
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>Gorgonzola and emmental seem to be the easiest cheeses to find.</p>
+<p>Fit the survival curves again using <code>survfit()</code>:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>km_plot <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> cheese, <span class="at">data =</span> lab5_dat)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(km_plot, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">xlab =</span> <span class="st">"Time"</span>, <span class="at">ylab =</span> <span class="st">"Survival Probability"</span>)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit a Kaplan-Meier model</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>km_plot <span class="ot">&lt;-</span> <span class="fu">survfit</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> cheese, <span class="at">data =</span> lab5_dat)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">legend =</span> <span class="fu">levels</span>(lab5_dat<span class="sc">$</span>cheese), <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">title =</span> <span class="st">"Groups"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot the model-implied survival curves</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(km_plot, <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">xlab =</span> <span class="st">"Time"</span>, <span class="at">ylab =</span> <span class="st">"Survival Probability"</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Add a legend identifying cheeses with different colors (col) and line types (lty)</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topright"</span>, <span class="at">legend =</span> <span class="fu">levels</span>(lab5_dat<span class="sc">$</span>cheese), <span class="at">col =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">lty =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="at">title =</span> <span class="st">"Groups"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="Biostatsweek_Lab5_ans_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="Biostatsweek_Lab5_ans_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>Gorgonzola and emmental seem to be the easiest cheeses to find (which, personally, I would avoid).</p>
 </div>
 </div>
 </div>
 </section>
 <section id="question-7" class="level3">
 <h3 class="anchored" data-anchor-id="question-7">Question 7</h3>
-<p>Fit a Cox proportional hazards regression model with time_to_find as response and cheese as regressor. Do the results correspond with your answers in the previous question?</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<p>Fit a Cox proportional hazards regression model with <code>time_to_find</code> as response and <code>cheese</code> as regressor. Do the results correspond with your answers in the previous question?</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -530,7 +605,7 @@ previous_training &lt; 5=TRUE  182       81      134      20.7      45.1
 </div>
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>Yes, the estimates of the hazards correspond to what we saw in the plot. Gorgonzola has the highest hazard rate followed by emmentaler, meaning that mice found those cheeses at a higher rate, meaning they are found sooner.</p>
+<p>A Cox proportional hazards model is fitted in R using <code>coxph()</code>:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">coxph</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> cheese, <span class="at">data =</span> lab5_dat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -546,17 +621,18 @@ Likelihood ratio test=6.94  on 3 df, p=0.07373
 n= 400, number of events= 252 </code></pre>
 </div>
 </div>
+<p>Yes, the estimates of the hazards correspond to what we saw in the plot. Gorgonzola has the highest hazard rate followed by emmentaler, meaning that mice found those cheeses at a higher rate, meaning they are found sooner as well. This also makes sense as survival probability and hazard rate are simply two different statistics/measures that represent the same thing!</p>
 </div>
 </div>
 </div>
 </section>
 <section id="question-8" class="level3">
 <h3 class="anchored" data-anchor-id="question-8">Question 8</h3>
-<p>Fit a proportional hazards regression model with time_to_find as response and time_from_last_meal, previous_training, and cheese as predictors. Interpret the output.</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<p>Fit a proportional hazards regression model with <code>time_to_find</code> as response and <code>time_from_last_meal</code>, <code>previous_training</code>, and <code>cheese</code> as predictors. Interpret the output.</p>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -591,10 +667,10 @@ n= 400, number of events= 252 </code></pre>
 <section id="question-9" class="level3">
 <h3 class="anchored" data-anchor-id="question-9">Question 9</h3>
 <p>Does it seem like the proportional hazards assumption is fulfilled for the model in question 8?</p>
-<div class="callout callout-style-simple callout-note callout-titled" title="Answer">
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Answer">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
-<i class="callout-icon"></i>
+<i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
 <span class="screen-reader-only">Note</span>Answer
@@ -603,9 +679,21 @@ n= 400, number of events= 252 </code></pre>
 </div>
 <div id="callout-9" class="callout-9-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>The null hypothesis is that there is a proportional relationship between the hazards. We see that the p-value is 0.051 so on the 0.05 significance level we would not reject.</p>
+<p>We can test teh proportional hazards assumption using Schoenfeld residuals. In <code>R</code>, we can test if these residuals are independent of time with the <code>cox.zph()</code> function. To this end, first fit the Cox model, and then call the <code>cox.zph()</code> function on this object:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(<span class="fu">coxph</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> time_from_last_meal <span class="sc">+</span> previous_training <span class="sc">+</span> cheese, <span class="at">data =</span> lab5_dat))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Fit the Cox models</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> time_from_last_meal <span class="sc">+</span> previous_training <span class="sc">+</span> cheese,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> lab5_dat</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>fit2 <span class="ot">&lt;-</span> <span class="fu">coxph</span>(</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">formula =</span> <span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> previous_training <span class="sc">&lt;</span> <span class="dv">5</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> lab5_dat</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Test if the Schoenfeld residuals (computed from the model) are independent of time</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(fit1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                     chisq df       p
 time_from_last_meal 15.503  1 8.2e-05
@@ -613,13 +701,14 @@ previous_training    6.204  1  0.0127
 cheese               0.354  3  0.9496
 GLOBAL              19.912  5  0.0013</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(<span class="fu">coxph</span>(<span class="fu">Surv</span>(time_to_find, find_cheese) <span class="sc">~</span> previous_training <span class="sc">&lt;</span> <span class="dv">5</span>, <span class="at">data =</span> lab5_dat))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cox.zph</span>(fit2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                      chisq df     p
 previous_training &lt; 5  3.82  1 0.051
 GLOBAL                 3.82  1 0.051</code></pre>
 </div>
 </div>
+<p>The null hypothesis is that there is a proportional relationship between the hazards. We see that the p-value is 0.051 so on the 0.05 significance level we would not reject.</p>
 </div>
 </div>
 </div>
@@ -702,7 +791,7 @@ GLOBAL                 3.82  1 0.051</code></pre>
     }
       var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
       var mailtoRegex = new RegExp(/^mailto:/);
-        var filterRegex = new RegExp('/' + window.location.host + '/');
+        var filterRegex = new RegExp("https:\/\/JeroenDMulder\.github\.io\/MMO\/");
       var isInternal = (href) => {
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
