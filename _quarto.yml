@@ -9,8 +9,6 @@ website:
     style: "floating"
     search: true
     contents:
-      - text: Home
-        href: index.qmd
       - text: "Day 1: Linear Regression"
         href: Biostatsweek_Lab1_ans.qmd
       - text: "Day 2: Logistic Regression"

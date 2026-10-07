@@ -84,7 +84,9 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./index.html">Home</a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">
+      MMO (Biostatistics) | Labs
+      </li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -116,12 +118,6 @@ ul.task-list li input[type="checkbox"] {
         </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./index.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Home</span></a>
-  </div>
-</li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./Biostatsweek_Lab1_ans.html" class="sidebar-item-text sidebar-link">
@@ -167,7 +163,7 @@ ul.task-list li input[type="checkbox"] {
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <h1 class="title">Lab Exercises</h1>
-<p class="subtitle lead">MMO (Biostatistics)</p>
+<p class="subtitle lead">Molecular Medicine - Oncology, Biostatistics</p>
 </div>
 
 
@@ -184,41 +180,41 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Welcome to the lab sessions for Applied Biostatistics. Each lab day has its own page with an R session (code from the lectures) and exercises to work through. Use the navigation bar above to open a specific lab.</p>
+<p>This website contains the lab exercises for the biostatistics week of the course Molecular Medicine - Oncology. Each day has its own page with exercises to work through. Use the navigation bar on the left to open a specific lab.</p>
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>The labs follow the lecture topics day by day. Each page starts with example R code, followed by assignment questions. Work through the R session first; the exercises are designed to be solvable with the commands shown there.</p>
+<p>The labs follow the lecture topics day by day. Work through the R exercises first; they are designed to be solvable with the commands shown there.</p>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 19%">
+<col style="width: 26%">
+<col style="width: 53%">
+</colgroup>
 <thead>
 <tr class="header">
-<th>Lab</th>
+<th>Day</th>
 <th>Topic</th>
 <th>Main methods</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="Biostatsweek_Lab1.Rmd">Lab 1</a></td>
+<td>1</td>
 <td>Linear regression</td>
 <td><code>lm()</code>, diagnostics, confidence intervals</td>
 </tr>
 <tr class="even">
-<td><a href="Biostatsweek_Lab2.Rmd">Lab 2</a></td>
+<td>2</td>
 <td>Logistic regression</td>
 <td><code>glm(family = binomial)</code>, odds ratios</td>
 </tr>
 <tr class="odd">
-<td><a href="Biostatsweek_Lab3.Rmd">Lab 3</a></td>
-<td>Causal inference</td>
-<td>Confounding, Simpson’s paradox</td>
+<td>3</td>
+<td>Model building, interactions, selection criteria, confounders</td>
+<td><code>lm()</code>, <code>glm(family = binomial)</code></td>
 </tr>
 <tr class="even">
-<td><a href="Biostatsweek_Lab4.Rmd">Lab 4</a></td>
-<td>Multiple regression</td>
-<td>Model building, interactions, LRT, AIC/BIC</td>
-</tr>
-<tr class="odd">
-<td><a href="Biostatsweek_Lab5.Rmd">Lab 5</a></td>
+<td>4</td>
 <td>Survival analysis</td>
 <td>Kaplan–Meier, Cox models (<code>survival</code> package)</td>
 </tr>
@@ -229,8 +225,8 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="before-you-start">Before You Start</h2>
 <ul>
 <li><strong>Software:</strong> <a href="https://www.r-project.org/">R</a> and <a href="https://posit.co/download/rstudio-desktop/">RStudio</a> (or Positron).</li>
-<li><strong>Packages:</strong> Lab 5 requires the <code>survival</code> package (<code>install.packages("survival")</code>). Other labs use base R.</li>
-<li><strong>Data files:</strong> Lab exercises read data from this folder (<code>Biostatsweek_data1.csv</code>, <code>data2.Rds</code>, <code>data4.Rds</code>, <code>data5.Rds</code>). Make sure these files are present before running the code chunks.</li>
+<li><strong>Packages:</strong> Lab 4 requires the <code>survival</code> package (<code>install.packages("survival")</code>). Other labs use base R.</li>
+<li><strong>Data files:</strong> Lab exercises require data that can be found on Canvas (<code>Biostatsweek_data1.csv</code>, <code>data2.Rds</code>, <code>data5.Rds</code>). Make sure these files are downloaded and findable for R before running the code.</li>
 </ul>
 
 

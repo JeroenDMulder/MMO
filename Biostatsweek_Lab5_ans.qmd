@@ -1,93 +1,122 @@
 ---
-title: "Lab 5 — Answer Key"
-author: "Karl Oskar Ekvall"
-format:
-  html:
-    toc: true
-    toc-depth: 2
-    code-copy: true
-    code-overflow: wrap
-    theme: cosmo
-execute:
-  echo: true
-  warning: false
-  message: false
+title: "Day 4: Survival Analysis"
+subtitle: "Molecular Medicine - Oncology, Biostatistics"
+author: "Jeroen D. Mulder, Pär Villner, Karl Oskar Ekvall"
+date: now
 ---
 
-Click a question box to reveal the answer and R code.
+In these lab exercises you will gain experience with survival analysis in `R`. For this, you will use data from an animal experiment involving $n = 400$ rats. 
 
-## Assignment description
+# Data Description
+The $n = 400$ rats participated in an experiment, in which they had to find cheese in a labyrinth. The rats are randomly assigned to a variety of conditions:
 
-*n* = 400 rats participate in an experiment, in which they have to find cheese in a labyrinth. The rats are randomly assigned to a variety of conditions:
+- `time_from_last_meal`: hours since the last meal (0-24)
+- `previous training`: how many times the rat did the same exercise in the past
+- `cheese`: the type of cheese (parmesan, gorgonzola, emmental, and feta)
 
-- time_from_last_meal: hours since the last meal (0-24)
-- previous training: how many times the rat did the same exercise in the past
-- cheese: the type of cheese (parmesan, gorgonzola, emmental, and feta)
+The dataset includes various variables related to the outcome: 
 
-Outcomes: avg_speed, find_cheese (0/1), time_to_find (censored if not found within 1 minute).
+- `avg_speed`
+- `find_cheese` (0 = no, 1 = yes)
+- `time_to_find` (censored if not found within 1 minute).
 
-Note: the time *T* of interest is the time it takes to find the cheese, so when we speak of "survival until time *t*", we mean the event *T* > *t*.
+Note that time *T* of interest is the time it takes to find the cheese, so when we speak of "survival until time *t*", we mean the event *T* > *t*.
+
+Load the data into R using the `readRDS()` function:
 
 ```{r setup}
-lab5_dat <- readRDS("data5.Rds")
+#| echo: true
+#| output: false
+lab5_dat <- readRDS("./data/data5.Rds")
 str(lab5_dat) # Should show data.frame with 400 obs of 6 variables
-
-library(survival)
 ```
+
+# Survival Analysis
+To perform survival analysis in R, we make use of the `survival` package, which can be installed with `install.packages("survival")` and loaded with `library(survival)`. 
 
 ### Question 1
-
 Use the code below and look at the table presented. Explain what the survival column means, and do the calculations necessary to get the same numbers.
 
-::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
-
-Time 2: 4/5 survives, 4 persons thereafter  
-Time 4: one person is censored. He leaves the dataset. Survival still 4/5. 3 persons thereafter.  
-Time 5: person dies, new prob: 2/3 × 4/5 = 8/15 = 0.5333  
-Time 6: person disappears, prob remains 0.53333. One person is left.  
-Time 8: Last person dies. We observed no one who survived longer than 8, so we estimate the probability of surviving longer to be 0.
-
 ```{r}
+#| echo: true
+#| output: false
 t <- c(2, 4, 5, 6, 8)
 s <- c(1, 0, 1, 0, 1)
+
+library(survival)
 surv_fit <- survfit(Surv(t, s) ~ 1)
+
 summary(surv_fit)
 ```
+
+::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+The first two lines create artifical surival data, where `t` represents the time at which an event happens, and `s` represents whether this event is censoring or the event of interest.
+
+The line `surv_fit <- survfit(Surv(t, s) ~ 1)` does two things simultaneously. First, the function `Surv()` takes the data, and transforms it into an outcome variable that can be read by the `survfit()` function (which does the actual model fitting). Runnining `Surv(t, s)` shows that for the censored outcomes, a `+` sign is added to the survival time, indicating that the event is right censored. 
+
+Using this data, we can compute the survival probabilities manually: 
+
+- Time 2: $\frac{4}{5}$ survive, 4 persons remain after this time;  
+- Time 4: one person is censored. They leaves the dataset. Survival is still $\frac{4}{5}$, but only 3 persons remain after this time.  
+- Time 5: person dies, so the survival probability is updated to $\frac{2}{3} \times \frac{4}{5} = \frac{8}{15} = 0.5333$.   
+- Time 6: one person is censored. They leaves the dataset. Survival probability remains the same, but only one person is left.  
+- Time 8: Last person dies. We observed no one who survived longer than 8, so we estimate the probability of surviving longer to be 0.
 :::
 
 ### Question 2
 
-Fit a simple logistic regression model investigating whether mice are more likely to find gorgonzola cheese than the other cheese types. Comment on the output.
+Fit a simple logistic regression model investigating whether mice are more likely to find gorgonzola cheese than the other cheese types. Comment on the results. 
 
 ::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
-
-The estimate indicates the probability of finding gorgonzola is higher than for the other cheese types. More precisely, the probability of finding gorgonzola is estimated to be $1 / (1 + \exp(-0.42 - 0.48))$ while the probability for the other cheese types is estimated to be $1 / (1 + \exp(-0.42))$. The p-value indicates the difference is significant on the 10% level but not on the 5% level.
-
+A logistic regression model can be fitted with the below code:
 ```{r}
-summary(glm(find_cheese ~ as.numeric(lab5_dat$cheese == "gorgonzola"), data = lab5_dat, family = binomial))
+# Fit logistic regression model
+fit_logistic <- glm(
+  formula = find_cheese ~ as.numeric(lab5_dat$cheese == "gorgonzola"),
+  data = lab5_dat,
+  family = binomial
+)
 
-1 / (1 + exp(-0.42 - 0.48)) # Probability for gorgonzola
-1 / (1 + exp(-0.42))         # Probability for other cheese types
+# Inspect output
+summary(fit_logistic)
+exp(coef(fit_logistic)[2])
+
+# Transform to probabilities
+1 / (1 + exp(-0.42 - 0.48))
+1 / (1 + exp(-0.42))
 ```
+
+The result indicate that the odds ratio is $e^{0.4760} = 1.60964$, indicating that the odds of finding gorgonzola cheese are higher than for finding other cheese types. This effect, however, is not significant at the 0.05 level, and hence I would not put too much weight on it. 
+
+To transform these results on the probability scale, we can make use of the logistic function that was discussed in day 2. The probability of finding gorgonzola is estimated to be $1 / (1 + \exp(-0.42 - 0.48)) =$ while the probability for the other cheese types is estimated to be $1 / (1 + \exp(-0.42))$.
 :::
 
 ### Question 3
 
-Define long_training and interpret the Kaplan-Meier plot by training group.
+Define a new variable called `long_training`. This variable divides the rats into those who have had more training than the median amount of experience with this exercise, and those who had less than the median. Interpret the Kaplan-Meier plot for both groups.
 
 ::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
-
-The figure indicates that survival probabilities, that is, the probability of not finding the cheese, are larger for mice with short training. Survival probabilities appear to be decreasing approximately linearly in time.
-
+You can create the new variable with:
 ```{r}
+# Create the new `long_training` variable
 lab5_dat$long_training <- lab5_dat$previous_training > median(lab5_dat$previous_training)
 ```
-
+To create the Kaplan-Meier survival curves for both groups, you can fit a survival model in which the survival time is predicted by group: 
 ```{r}
-fit <- survfit(Surv(time_to_find, find_cheese) ~ long_training, data = lab5_dat)
+# Fit a survival model predicting to finding by training experience
+fit <- survfit(
+  Surv(time_to_find, find_cheese) ~ long_training,
+  data = lab5_dat
+)
+
+# Plot Kaplan-Meier curves per group (indicated by different line types, lty)
 plot(fit, lty = 1:2)
+
+# Add a legend to the plot
 legend("bottomleft", legend = c("short training", "long training"), lty = 1:2)
 ```
+
+The figure indicates that survival probabilities, that is, the probability of not finding the cheese, are larger for mice with short training. Survival probabilities appear to be decreasing approximately linearly in time.
 :::
 
 ### Question 4
@@ -95,18 +124,32 @@ legend("bottomleft", legend = c("short training", "long training"), lty = 1:2)
 Plot the survival function of the time it took all the mice to find cheese. When is the hazard rate the highest and the lowest?
 
 ::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
-
-It looks like the mice are finding cheese uniformly over the time period. The hazard rate is lowest at the beginning and highest at the end.
+To plot a survival function for all mice, we can use the same function, `survfit()`, but simply without any predictors (groups):
 
 ```{r}
+# Estimate a survival curve across the entire sample
 fit <- survfit(Surv(time_to_find, find_cheese) ~ 1, data = lab5_dat)
-plot(fit, conf.int = F)
 
-reg_fit <- coxph(Surv(time_to_find, find_cheese) ~ 1, data = lab5_dat)
+# Visualize estimated survival curve
+plot(fit, conf.int = F)
+```
+
+To estimate hazards, we need to run a Cox regression. Again, we do this without any predictors in the model such that the estimated hazard is representative for the entire sample: 
+```{r}
+# Fit a Cox proportional hazards model
+reg_fit <- coxph(
+  formula = Surv(time_to_find, find_cheese) ~ 1,
+  data = lab5_dat
+)
+
+# Estimate the baseline hazard
 baseline <- basehaz(reg_fit)
 
+# Visualize the estimated hazard rate (i.e., combining estimates of Cox proportional hazard model and baseline hazard)
 plot(baseline$time, baseline$hazard, type = "l", main = "Hazard rates")
 ```
+
+It looks like the mice are finding cheese uniformly over the time period. The hazard rate (i.e., the slope) is lowest (i.e., most horizontal) at the beginning and highest at the end.
 :::
 
 ### Question 5
@@ -114,46 +157,66 @@ plot(baseline$time, baseline$hazard, type = "l", main = "Hazard rates")
 Perform a log-rank test to see if mice with less than 5 hours of training have the same survival function as mice with 5 or more hours of training.
 
 ::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
+First, create a new variable indicating whether mice had more or less than 5 hours of training: 
+```{r}
+# Create indicator for less than 5 hours of training
+lab5_dat$less_than_5 <- lab5_dat$previous_training < 5
+```
 
-We reject the null hypothesis of identical survival functions because of low p-value.
+Second, run a log-rank test comparing both groups on their mean survival time (i.e., time until finding the cheese):
 
 ```{r}
-survdiff(Surv(time_to_find, find_cheese) ~ previous_training < 5, data = lab5_dat)
+fit <- survdiff(
+  formula = Surv(time_to_find, find_cheese) ~ less_than_5,
+  data = lab5_dat
+)
+
+print(fit)
 ```
+
+We reject the null hypothesis of identical survival functions because the p-value is below our (default) significance criterion of 0.05. 
 :::
 
 ### Question 6
 
-Plot the survival functions for each cheese type. What do you observe?
+Plot the survival functions for each cheese type. Which cheeses to the mice find easiest to find? 
 
 ::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
 
-Gorgonzola and emmental seem to be the easiest cheeses to find.
+Fit the survival curves again using `survfit()`:
 
 ```{r}
+# Fit a Kaplan-Meier model
 km_plot <- survfit(Surv(time_to_find, find_cheese) ~ cheese, data = lab5_dat)
+
+# Plot the model-implied survival curves
 plot(km_plot, col = 1:4, lty = 1:4, xlab = "Time", ylab = "Survival Probability")
 
+# Add a legend identifying cheeses with different colors (col) and line types (lty)
 legend("topright", legend = levels(lab5_dat$cheese), col = 1:4, lty = 1:4, title = "Groups")
 ```
+
+Gorgonzola and emmental seem to be the easiest cheeses to find (which, personally, I would avoid). 
 :::
 
 ### Question 7
 
-Fit a Cox proportional hazards regression model with time_to_find as response and cheese as regressor. Do the results correspond with your answers in the previous question?
+Fit a Cox proportional hazards regression model with `time_to_find` as response and `cheese` as regressor. Do the results correspond with your answers in the previous question?
 
 ::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
 
-Yes, the estimates of the hazards correspond to what we saw in the plot. Gorgonzola has the highest hazard rate followed by emmentaler, meaning that mice found those cheeses at a higher rate, meaning they are found sooner.
+A Cox proportional hazards model is fitted in R using `coxph()`: 
 
 ```{r}
 coxph(Surv(time_to_find, find_cheese) ~ cheese, data = lab5_dat)
 ```
+
+Yes, the estimates of the hazards correspond to what we saw in the plot. Gorgonzola has the highest hazard rate followed by emmentaler, meaning that mice found those cheeses at a higher rate, meaning they are found sooner as well. This also makes sense as survival probability and hazard rate are simply two different statistics/measures that represent the same thing!
 :::
 
 ### Question 8
 
-Fit a proportional hazards regression model with time_to_find as response and time_from_last_meal, previous_training, and cheese as predictors. Interpret the output.
+Fit a proportional hazards regression model with `time_to_find` as response and `time_from_last_meal`, `previous_training`, and `cheese` as predictors. Interpret the output.
 
 ::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
 
@@ -170,11 +233,24 @@ Does it seem like the proportional hazards assumption is fulfilled for the model
 
 ::: {.callout-note appearance="simple" collapse="true" icon=false title="Answer"}
 
-The null hypothesis is that there is a proportional relationship between the hazards. We see that the p-value is 0.051 so on the 0.05 significance level we would not reject.
+We can test teh proportional hazards assumption using Schoenfeld residuals. In `R`, we can test if these residuals are independent of time with the `cox.zph()` function. To this end, first fit the Cox model, and then call the `cox.zph()` function on this object: 
 
 ```{r}
-cox.zph(coxph(Surv(time_to_find, find_cheese) ~ time_from_last_meal + previous_training + cheese, data = lab5_dat))
+# Fit the Cox models
+fit1 <- coxph(
+  formula = Surv(time_to_find, find_cheese) ~ time_from_last_meal + previous_training + cheese,
+  data = lab5_dat
+)
 
-cox.zph(coxph(Surv(time_to_find, find_cheese) ~ previous_training < 5, data = lab5_dat))
+fit2 <- coxph(
+  formula = Surv(time_to_find, find_cheese) ~ previous_training < 5,
+  data = lab5_dat
+)
+
+# Test if the Schoenfeld residuals (computed from the model) are independent of time
+cox.zph(fit1)
+cox.zph(fit2)
 ```
+
+The null hypothesis is that there is a proportional relationship between the hazards. We see that the p-value is 0.051 so on the 0.05 significance level we would not reject.
 :::
