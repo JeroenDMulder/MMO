@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Jeroen D. Mulder, Pär Villner, Karl Oskar Ekvall">
-<meta name="dcterms.date" content="2026-10-07">
+<meta name="dcterms.date" content="2026-10-14">
 
 <title>Day 3: Multiple Regression – MMO (Biostatistics) | Labs</title>
 <style>
@@ -264,7 +264,7 @@ window.Quarto = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 7, 2026</p>
+      <p class="date">October 14, 2026</p>
     </div>
   </div>
   
@@ -300,7 +300,7 @@ window.Quarto = {
 <p>Use the below code to load in the data:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in the data</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>lab4_dat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data4.Rds"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>lab4_dat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"./data/data4.Rds"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(lab4_dat) <span class="co"># Should show data.frame with 1453 obs of 17 variables</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="question-1" class="level3">
@@ -629,7 +629,7 @@ F-statistic: 983.5 on 10 and 1442 DF,  p-value: &lt; 2.2e-16</code></pre>
 </ul>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Read in the data</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>lab3_dat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data3.Rds"</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>lab3_dat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"./data/data3.Rds"</span>)</span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(lab3_dat) <span class="co"># Should show data.frame with 969 obs of 10 variables</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="question-1-1" class="level3">
@@ -776,7 +776,7 @@ F-statistic: 983.5 on 10 and 1442 DF,  p-value: &lt; 2.2e-16</code></pre>
 <div id="callout-15" class="callout-15-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <p>The estimates indicate the average size decrease is greater with drug B, and the difference is statistically significant. This agrees with our earlier finding that drug B is associated with lower levels of the protein.</p>
-<p>The intercept gives us the mean change in tumor size for people who received drug A. I.e. we see a decrease in tumor size for drug A patients. A t value and (rough) 95% CI is given below. We see that the t-value is pretty low (certainly smaller than 1.96) and -17 is inside the confidence interval. So we cannot reject the null hypothesis.</p>
+<p>The intercept gives us the mean change in tumor size for people who received drug A (i.e., . we see a decrease in tumor size for drug A patients). A <span class="math inline">\(t\)</span> value and (rough) 95% CI is given below. We see that the <span class="math inline">\(t\)</span>-value is pretty low (certainly smaller than 1.96) and it computes a <span class="math inline">\(p_value\)</span> that is (much) smaller than 0.05. Therefore, we conclude that intercept is significantly different from 0, which in this case means that there is a significant reduction in average size for patients on drug A.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>size_mod <span class="ot">&lt;-</span> <span class="fu">lm</span>(size_d <span class="sc">~</span> drug, lab3_dat)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(size_mod)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

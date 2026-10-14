@@ -32,7 +32,7 @@ Use the below code to load in the data:
 #| echo: true
 #| output: false
 # Read in the data
-lab4_dat <- readRDS("data4.Rds")
+lab4_dat <- readRDS("./data/data4.Rds")
 str(lab4_dat) # Should show data.frame with 1453 obs of 17 variables
 ```
 
@@ -259,7 +259,7 @@ We are interested in the following final outcomes:
 #| echo: true
 #| output: false
 # Read in the data
-lab3_dat <- readRDS("data3.Rds")
+lab3_dat <- readRDS("./data/data3.Rds")
 str(lab3_dat) # Should show data.frame with 969 obs of 10 variables
 ```
 
@@ -359,7 +359,7 @@ Use a simple linear regression model to estimate the effect of `drug` on `size_d
 
 The estimates indicate the average size decrease is greater with drug B, and the difference is statistically significant. This agrees with our earlier finding that drug B is associated with lower levels of the protein.
 
-The intercept gives us the mean change in tumor size for people who received drug A. I.e. we see a decrease in tumor size for drug A patients. A t value and (rough) 95% CI is given below. We see that the t-value is pretty low (certainly smaller than 1.96) and -17 is inside the confidence interval. So we cannot reject the null hypothesis.
+The intercept gives us the mean change in tumor size for people who received drug A (i.e., . we see a decrease in tumor size for drug A patients). A $t$ value and (rough) 95% CI is given below. We see that the $t$-value is pretty low (certainly smaller than 1.96) and it computes a $p_value$ that is (much) smaller than 0.05. Therefore, we conclude that intercept is significantly different from 0, which in this case means that there is a significant reduction in average size for patients on drug A.
 
 ```{r}
 #| echo: true
